@@ -1,0 +1,13 @@
+{application, frontier, [
+	{description, "Amazing yet simple caching system"},
+	{vsn, "1"},
+	{modules, []},
+	{registered, [frontier_sup]},
+	{applications, [
+		kernel,
+		stdlib,
+		cowboy
+	]},
+	{mod, {frontier_app, []}},
+	{env, []}
+]}.
