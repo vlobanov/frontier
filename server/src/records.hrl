@@ -1,0 +1,1 @@
+-record(result_packet, {seq_num, field_list, rows, extra}).

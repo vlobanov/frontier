@@ -18,7 +18,7 @@ start(_Type, _Args) ->
     {ok, _} = cowboy:start_http(http, 
         frontier_config:server_tcp_pool_size(),
         [{port, frontier_config:server_port()}], 
-        [{env, [{dispatch, Dispatch}]}
+        [{env, [{dispatch, Dispatch}, {max_connections, infinity}]}
     ]),
     frontier_sup:start_link().
 
