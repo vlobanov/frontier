@@ -14,6 +14,10 @@ run:
 	@$(REBAR) skip_deps=true compile
 	./start.sh 8080
 
+drun:
+	@$(REBAR) skip_deps=true compile -Ddebug
+	./start.sh 8080
+
 edoc:
 	@$(REBAR) doc
 
