@@ -10,6 +10,10 @@ all:
 compile:
 	@$(REBAR) skip_deps=true compile
 
+run:
+	@$(REBAR) skip_deps=true compile
+	./start.sh 8080
+
 edoc:
 	@$(REBAR) doc
 
