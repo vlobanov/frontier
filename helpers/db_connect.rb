@@ -1,0 +1,1 @@
+DB = Sequel.connect('mysql2://root:root@localhost/amazing_cache')
