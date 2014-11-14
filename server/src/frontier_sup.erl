@@ -16,6 +16,11 @@ start_link() ->
 
 %% supervisor.
 
+worker_params(Name) ->
+    {Name, {Name, start_link, []}, permanent, brutal_kill, worker, [Name]}.
+
 init([]) ->
-    Procs = [],
+    Procs = [
+        worker_params(frontier_cache_server)
+    ],
     {ok, {{one_for_one, 10, 10}, Procs}}.
