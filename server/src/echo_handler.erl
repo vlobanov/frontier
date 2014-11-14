@@ -5,22 +5,10 @@
 init(Req, Opts) ->
     Method = cowboy_req:method(Req),
     #{ids := IdsStr} = cowboy_req:match_qs([ids], Req),
-    JsonResp = json_array(split_ids(IdsStr)),
+    JsonResp = utils:json_array(utils:split_ids(IdsStr)),
     Req2 = echo(Method, JsonResp, Req),
     io:format("."),
     {ok, Req2, Opts}.
-
-split_ids(undefined) -> ["-"];
-split_ids(IdsStr) -> binary:split(IdsStr, <<",">>, [global]).
-
-json_array(Vals) ->
-    Joined = lists:foldr(fun (A, B) ->
-        if
-          bit_size(B) > 0 -> <<A/binary, <<", ">>/binary, B/binary>>;
-          true -> A
-        end
-      end, <<>>, Vals),
-    <<"[", Joined/binary, "]">>.
 
 echo(<<"GET">>, Resp, Req) ->
     cowboy_req:reply(200, [
