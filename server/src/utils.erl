@@ -21,7 +21,7 @@ json_array(Vals) ->
 convert_val(undefined) ->
     <<"null">>;
 convert_val(Val) when is_integer(Val) -> 
-    list_to_binary(integer_to_list(Val));
+    integer_to_binary(Val);
 convert_val(Val) when is_float(Val) -> 
     list_to_binary(io_lib:format("~.2f", [Val]));
 convert_val(Val) ->

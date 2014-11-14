@@ -32,6 +32,7 @@ init([]) ->
     {ok, TRef} = timer:send_interval(5 * 1000, refresh_cache),
     State = #state{tref=TRef},
     io:format("Cache gen server started in ~p\n", [self()]),
+    refresh_cache(),
     {ok, State}.
 
 %% @private
@@ -64,6 +65,23 @@ code_change(_OldVsn, State, _Extra) ->
 %% LOGIC %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-refresh_cache() ->
-    ?DEBUG("Refreshing cache", []).
+write_to_mnesia(Row) ->
+    [Id | _] = Row,
+    Json_data = utils:sdata_record_to_json(Row),
+    Id_bin = integer_to_binary(Id),
+    Sdata_record = #sdata_json{id=Id_bin, json=Json_data},
+    mnesia:dirty_write(sdata_json, Sdata_record).
 
+refresh_records(Total_count, Offset, Chunk_size) when Offset >= Total_count ->
+    ok;
+refresh_records(Total_count, Offset, Chunk_size) ->
+    Res = db_client:select_sdata(Offset, Chunk_size),
+    Rows = Res#result_packet.rows,
+    lists:foreach(fun write_to_mnesia/1, Rows),
+    refresh_records(Total_count, Offset + Chunk_size, Chunk_size).
+
+refresh_cache() ->
+    % ?DEBUG("Refreshing cache", []),
+    Total_count = db_client:count_sdata(),
+    Chunk_size = 5000,
+    refresh_records(Total_count, 0, Chunk_size).
