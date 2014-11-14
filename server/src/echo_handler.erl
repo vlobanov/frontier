@@ -7,6 +7,7 @@ init(Req, Opts) ->
     #{ids := IdsStr} = cowboy_req:match_qs([ids], Req),
     JsonResp = json_array(split_ids(IdsStr)),
     Req2 = echo(Method, JsonResp, Req),
+    io:format("."),
     {ok, Req2, Opts}.
 
 split_ids(undefined) -> ["-"];
@@ -23,7 +24,8 @@ json_array(Vals) ->
 
 echo(<<"GET">>, Resp, Req) ->
     cowboy_req:reply(200, [
-       {<<"content-type">>, <<"text/plain; charset=utf-8">>}
+       {<<"content-type">>, <<"text/plain; charset=utf-8">>},
+       {<<"connection">>, <<"close">>}
     ], Resp, Req);
 echo(_, _, Req) ->
     %% Method not allowed.
