@@ -19,7 +19,7 @@ create_table(Table, Record_name) ->
 
 % way around to pass variable to record_info
 record_fields(sdata_json) -> record_info(fields, sdata_json);
-record_fields(counters)   -> record_info(fields, counters).
+record_fields(counter)    -> record_info(fields, counter).
 
 create_counters() ->
     mnesia:dirty_update_counter(counters, some_counter, 0).
