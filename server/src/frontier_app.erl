@@ -14,8 +14,10 @@ start(_Type, _Args) ->
          {"/getObjects", get_objects_handler, []}
        ]}
     ]),
-    {ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [
-       {env, [{dispatch, Dispatch}]}
+    {ok, _} = cowboy:start_http(http, 
+        frontier_config:server_tcp_pool_size(),
+        [{port, frontier_config:server_port()}], 
+        [{env, [{dispatch, Dispatch}]}
     ]),
     frontier_sup:start_link().
 
