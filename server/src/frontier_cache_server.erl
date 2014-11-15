@@ -13,6 +13,8 @@
 -export([handle_info/2]).
 -export([terminate/2]).
 -export([code_change/3]).
+-export([refresh_cache/0]).
+-export([read_sdata/1]).
 
 -record(state, {
     tref = undefined  :: undefineds | timer:tref()
@@ -32,6 +34,7 @@ init([]) ->
     {ok, TRef} = timer:send_interval(5 * 1000, refresh_cache),
     State = #state{tref=TRef},
     io:format("Cache gen server started in ~p\n", [self()]),
+    ?TABLE = ets:new(?TABLE, [set, protected, named_table, {read_concurrency, true}]),
     refresh_cache(),
     {ok, State}.
 
@@ -48,7 +51,7 @@ handle_cast(_Msg, State) ->
 
 %% @private
 handle_info(refresh_cache, State) ->
-    refresh_cache(),
+    utils:measure_time(frontier_cache_server, refresh_cache, []),
     {noreply, State};
 handle_info(_Info, State) ->
     {noreply, State}.
@@ -61,18 +64,17 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% LOGIC %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+read_sdata(Key) ->
+    ets:lookup_element(?TABLE, Key, 2).
 
 write_to_mnesia(Row) ->
     [Id | _] = Row,
     Json_data = utils:sdata_record_to_json(Row),
     Id_bin = integer_to_binary(Id),
-    Sdata_record = #sdata_json{id=Id_bin, json=Json_data},
-    mnesia:dirty_write(sdata_json, Sdata_record).
+    ets:insert(?TABLE, {Id_bin, Json_data}).
+    % mnesia:dirty_write(sdata_json, Sdata_record).
 
-refresh_records(Total_count, Offset, Chunk_size) when Offset >= Total_count ->
+refresh_records(Total_count, Offset, _) when Offset >= Total_count ->
     ok;
 refresh_records(Total_count, Offset, Chunk_size) ->
     Res = db_client:select_sdata(Offset, Chunk_size),
@@ -80,8 +82,8 @@ refresh_records(Total_count, Offset, Chunk_size) ->
     lists:foreach(fun write_to_mnesia/1, Rows),
     refresh_records(Total_count, Offset + Chunk_size, Chunk_size).
 
+
 refresh_cache() ->
-    % ?DEBUG("Refreshing cache", []),
     Total_count = db_client:count_sdata(),
-    Chunk_size = 5000,
+    Chunk_size = 6000,
     refresh_records(Total_count, 0, Chunk_size).

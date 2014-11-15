@@ -5,7 +5,8 @@
 init(Req, Opts) ->
     Method = cowboy_req:method(Req),
     #{ids := IdsStr} = cowboy_req:match_qs([ids], Req),
-    JsonResp = utils:json_array(utils:split_ids(IdsStr)),
+    % JsonResp = utils:json_array(utils:split_ids(IdsStr)),
+    JsonResp = <<"oh.">>,
     Req2 = echo(Method, JsonResp, Req),
     io:format("."),
     {ok, Req2, Opts}.

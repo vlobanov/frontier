@@ -1,10 +1,18 @@
--include_lib("eunit/include/eunit.hrl").
 
 -module(utils).
+
+-include_lib("eunit/include/eunit.hrl").
+-include("records.hrl").
 
 -export([split_ids/1]).
 -export([json_array/1]).
 -export([sdata_record_to_json/1]).
+-export([measure_time/3]).
+
+measure_time(Module, Func, Args) ->
+    {T, Res} = timer:tc(Module, Func, Args),
+    ?DEBUG("--~p:~p (~p)  -> ~p\n", [Module, Func, Args, T / 1000]),
+    Res.
 
 split_ids(undefined) -> [<<"-">>];
 split_ids(IdsStr) -> binary:split(IdsStr, <<",">>, [global]).
@@ -23,7 +31,7 @@ convert_val(undefined) ->
 convert_val(Val) when is_integer(Val) -> 
     integer_to_binary(Val);
 convert_val(Val) when is_float(Val) -> 
-    list_to_binary(io_lib:format("~.2f", [Val]));
+    float_to_binary(Val, [{decimals, 2}]);
 convert_val(Val) ->
     <<<<"\"">>/binary, Val/binary, <<"\"">>/binary>>.
 

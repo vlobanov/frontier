@@ -4,16 +4,26 @@
 
 init(Req, Opts) ->
     Method = cowboy_req:method(Req),
-    #{ids := Echo} = cowboy_req:match_qs([ids], Req),
-    Req2 = echo(Method, Echo, Req),
+    #{ids := Ids} = cowboy_req:match_qs([ids], Req),
+    Ids_list = utils:split_ids(Ids),
+    Response = fetch_sdata_json_array(Ids_list),
+    Req2 = make_response_req(Method, Response, Req),
     {ok, Req2, Opts}.
 
-echo(<<"GET">>, undefined, Req) ->
+fetch_sdata_json_array(Ids) ->
+    Sdata_json_vals = lists:map(
+        fun (Id) ->
+            frontier_cache_server:read_sdata(Id)
+        end,
+        Ids),
+    utils:json_array(Sdata_json_vals).
+
+make_response_req(<<"GET">>, undefined, Req) ->
     cowboy_req:reply(400, [], <<"Missing ids parameter.">>, Req);
-echo(<<"GET">>, Echo, Req) ->
+make_response_req(<<"GET">>, Echo, Req) ->
     cowboy_req:reply(200, [
        {<<"content-type">>, <<"text/plain; charset=utf-8">>}
     ], Echo, Req);
-echo(_, _, Req) ->
+make_response_req(_, _, Req) ->
     %% Method not allowed.
     cowboy_req:reply(405, Req).
