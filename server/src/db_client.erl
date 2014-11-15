@@ -6,7 +6,7 @@
 
 init() ->
     Credentials = frontier_config:db_credentials(),
-    DB_pool_config = lists:concat([[frontier_pool, 1], Credentials]),
+    DB_pool_config = lists:concat([[frontier_pool, 4], Credentials]),
     apply(emysql, add_pool, DB_pool_config),
     prepare_queries(),
     ok.
