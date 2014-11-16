@@ -21,6 +21,7 @@ worker_params(Name) ->
 
 init([]) ->
     Procs = [
-        worker_params(frontier_cache_server)
+        worker_params(frontier_cache_server),
+        worker_params(frontier_rqpm_server)
     ],
     {ok, {{one_for_one, 10, 10}, Procs}}.

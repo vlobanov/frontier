@@ -8,6 +8,7 @@ init(Req, Opts) ->
     Ids_list = utils:split_ids(Ids),
     Response = fetch_sdata_json_array(Ids_list),
     Req2 = make_response_req(Method, Response, Req),
+    frontier_rqpm_server:count_request(),
     {ok, Req2, Opts}.
 
 fetch_sdata_json_array(Ids) ->

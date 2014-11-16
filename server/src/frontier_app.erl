@@ -12,7 +12,8 @@ start(_Type, _Args) ->
     Dispatch = cowboy_router:compile([
        {'_', [
          {"/getObjects", get_objects_handler, []},
-         {"/echo", echo_handler, []}
+         {"/echo", echo_handler, []},
+         {"/rqpm", frontier_rqpm_handler, []}
        ]}
     ]),
     {ok, _} = cowboy:start_http(http, 

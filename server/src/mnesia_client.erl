@@ -11,7 +11,6 @@ init() ->
     ok.
 
 create_tables() ->
-    create_table(sdata_json, sdata_json),
     create_table(counters, counter).
 
 create_table(Table, Record_name) ->
@@ -22,4 +21,5 @@ record_fields(sdata_json) -> record_info(fields, sdata_json);
 record_fields(counter)    -> record_info(fields, counter).
 
 create_counters() ->
-    mnesia:dirty_update_counter(counters, some_counter, 0).
+    mnesia:dirty_update_counter(counters, req_curr_count, 0),
+    mnesia:dirty_update_counter(counters, req_last_count, 0).
