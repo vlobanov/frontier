@@ -67,18 +67,19 @@ code_change(_OldVsn, State, _Extra) ->
 read_sdata(Key) ->
     ets:lookup_element(?TABLE, Key, 2).
 
-write_to_ets(Row) ->
+write_to_mnesia(Row) ->
     [Id | _] = Row,
     Json_data = utils:sdata_record_to_json(Row),
     Id_bin = integer_to_binary(Id),
     ets:insert(?TABLE, {Id_bin, Json_data}).
+    % mnesia:dirty_write(sdata_json, Sdata_record).
 
 refresh_records(Total_count, Offset, _) when Offset >= Total_count ->
     ok;
 refresh_records(Total_count, Offset, Chunk_size) ->
     Res = db_client:select_sdata(Offset, Chunk_size),
     Rows = Res#result_packet.rows,
-    lists:foreach(fun write_to_ets/1, Rows),
+    lists:foreach(fun write_to_mnesia/1, Rows),
     refresh_records(Total_count, Offset + Chunk_size, Chunk_size).
 
 
